@@ -1,29 +1,34 @@
 FROM php:8.2-fpm
 
-# Dependências necessárias
-RUN apt-get update --fix-missing && apt-get install -y \
-    nginx supervisor zip unzip libonig-dev libicu-dev libzip-dev libpq-dev \
+# Dependências
+RUN apt-get update --fix-missing
+RUN apt-get install -y \
+    zip unzip \
+    libonig-dev libicu-dev \
+    libzip-dev libpq-dev \
     build-essential libssl-dev zlib1g-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    postgresql-client \
+    supervisor \
+    nginx
 
-# Instalação de extensões PHP
+# Extensões PHP
 RUN docker-php-ext-install pdo zip pdo_pgsql pgsql opcache
+RUN docker-php-ext-enable pdo zip pdo_pgsql pgsql opcache
 
-# Instala o Composer
+# Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copia arquivos do projeto
+# Copiar app
+COPY . /var/www
 WORKDIR /var/www
-COPY . .
 
-# Instala as dependências PHP
+# Instalar dependências PHP
 RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
-# Copia os arquivos de configuração do nginx e supervisor
-COPY docker/nginx/default.conf /etc/nginx/sites-available/default
-COPY docker/supervisord.conf /etc/supervisord.conf
+# Copiar configs do supervisord e entrypoint
+COPY supervisord.conf /etc/supervisord.conf
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Expõe porta HTTP padrão
-EXPOSE 80
-
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+EXPOSE 80 9000
+ENTRYPOINT ["/entrypoint.sh"]
