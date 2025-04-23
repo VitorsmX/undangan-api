@@ -28,6 +28,9 @@ RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-interacti
 # Copiar configs do supervisord e entrypoint
 COPY supervisord.conf /etc/supervisord.conf
 COPY entrypoint.sh /entrypoint.sh
+COPY ca.pem /var/www/ca.pem
+RUN chmod 644 /var/www/ca.pem
+
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80 9000
