@@ -14,7 +14,6 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 COPY . /var/www
 WORKDIR /var/www
 
-RUN chmod 777 -R /var/www/cache
 RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
 EXPOSE 9000
