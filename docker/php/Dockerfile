@@ -17,8 +17,9 @@ WORKDIR /var/www
 RUN chmod 777 -R /var/www/cache
 RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
-RUN php saya key
-RUN php saya view:cache
+RUN chmod +x saya
+RUN ./saya key
+RUN ./saya view:cache
 
 EXPOSE 9000
 CMD ["php-fpm"]
